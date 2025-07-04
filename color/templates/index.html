@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Away</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;570;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Global CSS Variables for easy theme management and consistency */
+        :root {
+            --bg-primary: #121212; /* Very dark background for a premium feel */
+            --bg-secondary: rgba(255, 255, 255, 0.03); /* Lighter transparent background for sections */
+            --text-light: #e0e0e0; /* Light text for readability on dark background */
+            --text-muted: rgba(255, 255, 255, 0.6); /* Slightly faded text for descriptions */
+            --accent-color: #bb86fc; /* A subtle accent color for highlights, can be dynamic */
+            --border-color: rgba(255, 255, 255, 0.1); /* Subtle border for structure */
+            --shadow-light: rgba(0, 0, 0, 0.2); /* Light shadow for depth */
+            --shadow-medium: rgba(0, 0, 0, 0.4); /* Medium shadow */
+            --shadow-heavy: rgba(0, 0, 0, 0.6); /* Heavier shadow for contrast */
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 0.75rem;
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2.5rem;
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --transition-speed-fast: 0.2s ease-out; /* For quick hover effects */
+            --transition-speed-normal: 0.4s ease-in-out; /* For smoother transitions */
+            --transition-speed-slow: 0.8s ease-in-out; /* For initial animations */
+        }
+
+        body {
+            font-family: 'Lato', sans-serif; /* Lato for body text */
+            background-color: var(--bg-primary);
+            color: var(--text-light);
+            margin: 0;
+            padding: var(--spacing-lg) var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+            box-sizing: border-box;
+            /* Artistic Atmospheric Backgrounds: Layered radial gradients */
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(26, 26, 26, 0.2), transparent 80%),
+                radial-gradient(circle at 90% 80%, rgba(26, 26, 26, 0.2), transparent 80%),
+                linear-gradient(to bottom, rgba(18, 18, 18, 0.8), rgba(18, 18, 18, 0.95)); /* Subtle overall dark gradient */
+            background-blend-mode: overlay; /* Blends the gradients nicely */
+            transition: background-color var(--transition-speed-normal);
+        }
+
+        /* Header and Navigation */
+        .header-container {
+            width: 95%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md); /* Adjusted margin for dynamic strip */
+            padding: 0 var(--spacing-sm);
+            position: relative; /* For absolute positioning of toast */
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif; /* Playfair Display for headings */
+            font-size: 2.8rem; /* Slightly larger for impact */
+            font-weight: 700;
+            color: var(--text-light);
+            text-align: center;
+            flex-grow: 1; /* Allows h1 to take available space for centering */
+            margin: 0;
+            /* Adjust padding-left/right to visually center based on nav width dynamically */
+            /* This ensures visual centering by counter-balancing the navigation on the right */
+            padding-left: clamp(0px, (100% - 1200px)/2 + 150px, 150px);
+            padding-right: clamp(0px, (100% - 1200px)/2 + 150px, 150px);
+            box-sizing: border-box;
+            transition: color var(--transition-speed-normal), text-shadow var(--transition-speed-normal);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.15); /* More pronounced text glow */
+            letter-spacing: 0.05em; /* Add some letter spacing for artistic look */
+        }
+
+        .main-nav {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-shrink: 0; /* Prevent nav from shrinking */
+        }
+
+        .main-nav a {
+            font-family: 'Lato', sans-serif;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            padding: var(--spacing-sm) var(--spacing-sm);
+            border-radius: var(--border-radius-sm);
+            transition: color var(--transition-speed-fast), background-color var(--transition-speed-fast), transform var(--transition-speed-fast), text-shadow var(--transition-speed-fast);
+            position: relative;
+            overflow: hidden; /* For subtle background highlight effect */
+            z-index: 1;
+        }
+
+        .main-nav a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.07); /* Subtle background highlight */
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform var(--transition-speed-fast);
+            z-index: -1;
+        }
+
+        .main-nav a:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .main-nav a:hover {
+            color: var(--text-light);
+            transform: translateY(-2px); /* Subtle lift */
+            text-shadow: 0 0 10px var(--accent-color); /* More vibrant glow on text */
+        }
+
+        /* Dynamic Top-Bar Color Display */
+        .color-strip-banner {
+            width: 100%;
+            height: 60px; /* Slightly taller for more visual impact */
+            display: flex;
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--border-radius-md);
+            overflow: hidden; /* Ensures smooth edges */
+            /* Elevated shadow with inner glow, and a subtle glow from accent color */
+            box-shadow: 0 5px 30px var(--shadow-heavy), inset 0 0 15px rgba(255, 255, 255, 0.08), 0 0 25px var(--accent-color);
+            transition: all var(--transition-speed-normal); /* Smooth transition for color changes */
+            opacity: 0; /* For initial load animation */
+            transform: translateY(10px); /* For initial load animation */
+            animation: fadeInSlideDown 0.8s ease-out forwards 0.5s; /* Delay after main container */
+        }
+
+        @keyframes fadeInSlideDown {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .color-strip-segment {
+            flex: 1;
+            height: 100%;
+            /* Dynamic linear gradient within each segment for 'splash of colors' */
+            background-image: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.3)); /* Subtle gradient overlay */
+            transition: background-color var(--transition-speed-normal), background-image var(--transition-speed-normal); /* Smooth color transitions for segments */
+            position: relative;
+        }
+
+        /* Main Content Container */
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+            padding: var(--spacing-lg);
+            box-sizing: border-box;
+            background-color: var(--bg-secondary); /* Use defined secondary background */
+            border-radius: var(--border-radius-md);
+            /* Elevated shadowing for a premium feel with subtle glow */
+            box-shadow: 
+                0 15px 60px var(--shadow-heavy), /* Deeper main shadow */
+                0 0 0 1px rgba(255, 255, 255, 0.1), /* Fine inner border/highlight */
+                /* Dynamic Aura: This will be updated by JS to reflect the base color */
+                0 0 40px rgba(187, 134, 252, 0.2); /* Initial subtle accent glow */
+            transition: background-color var(--transition-speed-normal), box-shadow var(--transition-speed-normal);
+            opacity: 0; /* For initial load animation */
+            transform: translateY(20px); /* For initial load animation */
+            animation: fadeInSlideUp 0.8s ease-out forwards 0.3s; /* Delay start */
+            backdrop-filter: blur(8px); /* More pronounced blur for transparency effect */
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        /* Keyframes for initial load animation */
+        @keyframes fadeInSlideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2, h3 {
+            font-family: 'Playfair Display', serif; /* Playfair Display for headings */
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-light);
+            text-align: center;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.08); /* Enhanced text shadow */
+            letter-spacing: 0.03em;
+        }
+
+        h2 { font-size: 2rem; }
+        h3 { font-size: 1.6rem; }
+
+        p {
+            font-family: 'Lato', sans-serif; /* Lato for paragraph text */
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        /* Section Styling */
+        section {
+            background-color: rgba(255, 255, 255, 0.02); /* Very subtle transparent background for sections */
+            border: 1px solid var(--border-color);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius-md);
+            /* Enhanced shadow with more depth and subtle inner glow */
+            box-shadow: 0 6px 20px var(--shadow-light), inset 0 0 8px rgba(255, 255, 255, 0.05);
+            transition: background-color var(--transition-speed-normal), border-color var(--transition-speed-normal), box-shadow var(--transition-speed-normal);
+            position: relative; /* Needed for tooltip positioning */
+            overflow: visible; /* Ensure tooltips are not clipped */
+            backdrop-filter: blur(5px); /* More pronounced blur for sections */
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        /* Color Picker Section */
+        .color-picker-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .color-picker-section label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .color-picker {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 90px;
+            height: 90px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            border-radius: 50%;
+            overflow: hidden;
+            outline: none;
+            box-shadow: 0 0 0 5px var(--accent-color); /* Highlight around picker */
+            transition: transform var(--transition-speed-fast), box-shadow var(--transition-speed-normal);
+        }
+
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+
+        .color-picker::-moz-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+
+        .color-picker:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 7px var(--accent-color), 0 0 25px var(--accent-color); /* Enhanced glow on hover */
+        }
+
+        #baseColorValue {
+            font-weight: 500;
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+
+        /* Palettes Grid */
+        .palettes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .palette-section {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .color-swatches {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px; /* Slightly larger gap for swatches */
+            justify-content: center;
+        }
+
+        .color-swatch {
+            width: 70px; /* Larger swatches */
+            height: 70px;
+            border-radius: var(--border-radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+            cursor: pointer;
+            position: relative; /* For tooltip positioning */
+            overflow: visible; /* Ensure tooltip is not clipped */
+            transition: background-color var(--transition-speed-normal), transform var(--transition-speed-fast), border-color var(--transition-speed-normal), box-shadow var(--transition-speed-normal);
+            box-shadow: 0 3px 12px var(--shadow-light), inset 0 0 6px rgba(255, 255, 255, 0.06); /* Initial subtle shadow with inner glow */
+            display: flex; /* For centering content within swatch if needed */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .color-swatch:hover {
+            transform: translateY(-5px) scale(1.05); /* More pronounced lift */
+            box-shadow: 0 8px 30px var(--shadow-medium), 0 0 20px rgba(255, 255, 255, 0.25), 0 0 35px var(--accent-color); /* Enhanced glow on hover */
+            z-index: 10; /* Ensure tooltip appears above other swatches */
+        }
+
+        /* Tooltip for Swatches */
+        .swatch-tooltip {
+            position: absolute;
+            bottom: calc(100% + 10px); /* Position above the swatch */
+            left: 50%;
+            transform: translateX(-50%) translateY(10px); /* Start slightly lower for slide-up effect */
+            background-color: var(--bg-primary); /* Dark background for tooltip */
+            color: var(--text-light);
+            padding: 8px 12px;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.8rem;
+            white-space: nowrap; /* Prevent text wrapping */
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none; /* Allow clicks through to elements behind */
+            transition: opacity 0.3s ease-out, visibility 0.3s ease-out, transform 0.3s ease-out;
+            z-index: 20; /* Higher z-index to ensure visibility */
+            box-shadow: 0 5px 20px var(--shadow-heavy); /* Deeper shadow for tooltip */
+            border: 1px solid var(--border-color);
+            line-height: 1.4;
+        }
+
+        .swatch-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px; /* Slightly larger arrow */
+            border-style: solid;
+            border-color: var(--bg-primary) transparent transparent transparent;
+        }
+
+        .color-swatch:hover .swatch-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0); /* Slide up to final position */
+        }
+
+        /* Toast Notification (Copy Confirmation) */
+        .toast-notification {
+            position: fixed;
+            bottom: var(--spacing-lg);
+            left: 50%;
+            transform: translateX(-50%) translateY(20px); /* Start slightly lower for slide-up */
+            background-color: rgba(50, 200, 100, 0.9); /* Greenish for success */
+            color: white;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.9rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            z-index: 100; /* Ensure it's on top */
+            box-shadow: 0 5px 20px var(--shadow-heavy);
+            white-space: nowrap;
+        }
+
+        .toast-notification.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* UI Elements Preview */
+        .ui-preview-section {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+            align-items: center;
+        }
+
+        .ui-element-display {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            align-items: center;
+            position: relative; /* For precise positioning of labels */
+        }
+
+        /* UI Element Labels (always visible) */
+        .ui-element-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 5px; /* Space between label and element */
+            padding: 4px 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 3px rgba(0,0,0,0.2);
+            transition: all var(--transition-speed-fast);
+        }
+
+        .demo-button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color var(--transition-speed-normal), color var(--transition-speed-normal), transform var(--transition-speed-fast), box-shadow var(--transition-speed-normal), border var(--transition-speed-normal);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5); /* Deeper button shadow */
+            position: relative; /* For applying specific effects */
+            overflow: hidden;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-4px); /* More pronounced lift */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7), 0 0 25px var(--accent-color); /* Even deeper shadow + glow on hover */
+            border: 1px solid var(--accent-color); /* Subtle border change */
+        }
+
+
+        .demo-text-block {
+            background-color: rgba(255, 255, 255, 0.05); /* Slightly more opaque for text block */
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius-md);
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            transition: background-color var(--transition-speed-normal), color var(--transition-speed-normal), border-color var(--transition-speed-normal), box-shadow var(--transition-speed-normal);
+            border: 1px solid rgba(255, 255, 255, 0.15); /* Slightly more prominent border */
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(255, 255, 255, 0.03); /* Deeper shadow with inner glow */
+            position: relative;
+        }
+
+        .demo-text-block:hover {
+            border-color: var(--accent-color); /* Highlight border on hover */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 0 30px rgba(187, 134, 252, 0.3); /* Enhanced shadow + glow */
+        }
+
+        .demo-text-block p {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--text-light);
+        }
+
+        /* Separator Line */
+        hr {
+            width: 100%;
+            border: 0;
+            border-top: 1px solid var(--border-color);
+            margin: var(--spacing-lg) 0;
+            opacity: 0.4;
+        }
+
+        /* --- Modal Styles --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85); /* Darker, semi-transparent overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-speed-normal), visibility var(--transition-speed-normal);
+            backdrop-filter: blur(10px); /* Stronger blur for modals */
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            font-family: 'Lato', sans-serif; /* Lato for modal content */
+            background-color: var(--bg-primary);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius-md);
+            max-width: 550px; /* Slightly larger max-width */
+            width: 90%;
+            box-shadow: 0 15px 50px var(--shadow-heavy), 0 0 40px var(--accent-color); /* Prominent shadow and glow */
+            position: relative;
+            transform: translateY(30px); /* Start slightly lower for slide-up */
+            opacity: 0;
+            transition: transform var(--transition-speed-normal), opacity var(--transition-speed-normal);
+            border: 1px solid var(--border-color);
+            overflow-y: auto; /* Enable scrolling for longer content */
+            max-height: 90vh; /* Limit modal height */
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-xs);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h3 {
+            font-family: 'Playfair Display', serif; /* Playfair Display for modal headings */
+            margin: 0;
+            color: var(--text-light);
+            text-align: left;
+            font-size: 1.8rem;
+        }
+
+        .modal-close-button {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color var(--transition-speed-fast), transform var(--transition-speed-fast);
+        }
+
+        .modal-close-button:hover {
+            color: var(--accent-color);
+            transform: rotate(90deg);
+        }
+
+        /* Login Form Specific Styles */
+        .login-form label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .login-form input[type="text"],
+        .login-form input[type="password"],
+        .login-form input[type="email"] {
+            width: calc(100% - 20px); /* Adjust for padding */
+            padding: 12px; /* Slightly larger padding */
+            margin-bottom: var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            background-color: rgba(255, 255, 255, 0.08); /* Slightly more opaque background */
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: border-color var(--transition-speed-fast), box-shadow var(--transition-speed-fast);
+        }
+
+        .login-form input[type="text"]:focus,
+        .login-form input[type="password"]:focus,
+        .login-form input[type="email"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(187, 134, 252, 0.4);
+        }
+
+        .login-form button {
+            width: 100%;
+            padding: 14px; /* Larger button */
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: 1.2rem; /* Larger font size */
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color var(--transition-speed-fast), transform var(--transition-speed-fast), box-shadow var(--transition-speed-fast);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .login-form button:hover {
+            background-color: #a06dfa;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .login-form .forgot-password {
+            display: block;
+            text-align: center;
+            margin-top: var(--spacing-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color var(--transition-speed-fast);
+        }
+
+        .login-form .forgot-password:hover {
+            color: var(--accent-color);
+        }
+        
+        /* About Modal Specific Styles */
+        .about-content p {
+            margin-bottom: var(--spacing-md);
+            font-weight: 300;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        .about-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--border-radius-sm);
+            margin: var(--spacing-md) 0;
+            box-shadow: 0 5px 20px var(--shadow-medium);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Support Modal Specific Styles */
+        .support-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-md);
+            text-align: center;
+        }
+        .support-content p {
+            margin: 0;
+        }
+        .support-content a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition-speed-fast);
+        }
+        .support-content a:hover {
+            color: #a06dfa;
+            text-decoration: underline;
+        }
+        .support-content img.qr-code {
+            border: 5px solid white; /* White border for QR code */
+            border-radius: var(--border-radius-sm);
+            box-shadow: 0 5px 20px var(--shadow-heavy);
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: var(--spacing-md);
+                text-align: center;
+            }
+
+            h1 {
+                font-size: 2.2rem; /* Adjusted for smaller screens */
+                padding-left: 0; /* Remove counter-acting padding */
+                padding-right: 0;
+            }
+            .main-nav {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .color-strip-banner {
+                height: 50px; /* Slightly smaller banner on mobile */
+            }
+
+            .container {
+                width: 100%;
+                padding: var(--spacing-md) var(--spacing-sm);
+            }
+
+            .palettes-grid {
+                grid-template-columns: 1fr; /* Stack columns on small screens */
+            }
+
+            h2 {
+                font-size: 1.8rem;
+            }
+            h3 {
+                font-size: 1.4rem;
+            }
+
+            .color-swatch {
+                width: 60px;
+                height: 60px;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: var(--spacing-md);
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            .main-nav a {
+                font-size: 0.9rem;
+                padding: 0.5rem 0.75rem;
+            }
+            .color-picker {
+                width: 70px;
+                height: 70px;
+            }
+            .swatch-tooltip {
+                font-size: 0.7rem;
+                padding: 6px 10px;
+            }
+            .ui-element-label {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+            }
+            .demo-button, .login-form button {
+                font-size: 1rem;
+                padding: 10px 20px;
+            }
+            .modal-header h3 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <h1>Color Away</h1>
+        <nav class="main-nav">
+            <a href="#login" id="loginButton">Login</a>
+            <a href="#about" id="aboutButton">About</a>
+            <a href="#support" id="supportButton">Support</a>
+        </nav>
+    </div>
+
+    <div class="color-strip-banner" id="colorStripBanner">
+        <div class="color-strip-segment" id="baseColorSegment"></div>
+        <div class="color-strip-segment" id="complementaryColorSegment"></div>
+        <div class="color-strip-segment" id="analogousColorSegment"></div>
+        <div class="color-strip-segment" id="monochromaticColorSegment"></div>
+    </div>
+
+    <div class="container">
+        <section class="color-picker-section">
+            <h2>Choose Your Base Color</h2>
+            <label for="baseColorPicker">Select a color to start exploring its harmonies:</label>
+            <input type="color" id="baseColorPicker" class="color-picker" value="#3498db">
+            <div id="baseColorValue" style="font-weight: 500; margin-top: 0.5rem;">Hex: #3498db</div>
+        </section>
+
+        <hr>
+
+        <h2>Color Palettes Explained</h2>
+        <div class="palettes-grid">
+            <section class="palette-section">
+                <h3>Complementary</h3>
+                <div id="complementaryPalette" class="color-swatches">
+                    </div>
+                <p class="palette-description">
+                    Colors directly opposite each other on the color wheel. They create high contrast and can be used to make elements stand out, but should be used carefully to avoid visual tension.
+                </p>
+            </section>
+
+            <section class="palette-section">
+                <h3>Analogous</h3>
+                <div id="analogousPalette" class="color-swatches">
+                    </div>
+                <p class="palette-description">
+                    Colors that are next to each other on the color wheel. They usually match well and create serene, comfortable designs. Often found in nature.
+                </p>
+            </section>
+
+            <section class="palette-section">
+                <h3>Triadic</h3>
+                <div id="triadicPalette" class="color-swatches">
+                    </div>
+                <p class="palette-description">
+                    Three colors that are evenly spaced around the color wheel, forming a perfect triangle. They offer vibrant contrast while maintaining harmony, often used for bold designs.
+                </p>
+            </section>
+
+            <section class="palette-section">
+                <h3>Monochromatic</h3>
+                <div id="monochromaticPalette" class="color-swatches">
+                    </div>
+                <p class="palette-description">
+                    Different shades, tints, and tones of a single hue. These palettes are subtle, cohesive, and easy on the eyes, creating a clean and elegant look.
+                </p>
+            </section>
+        </div>
+
+        <hr>
+
+        <section class="ui-preview-section">
+            <h2>UI Element Preview</h2>
+            <p class="palette-description" style="text-align: center;">See how the generated palette can influence common UI elements.</p>
+            <div class="ui-element-display">
+                <div id="buttonLabel" class="ui-element-label">Button BG: Base Color, Text: Complementary</div>
+                <button id="demoButton" class="demo-button">Call to Action</button>
+                <div id="textBlockLabel" class="ui-element-label" style="margin-top: var(--spacing-md);">Text Block BG: Monochromatic Shade 1, Text: Monochromatic Shade 3</div>
+                <div id="demoTextBlock" class="demo-text-block">
+                    <p>This is a sample text block demonstrating how colors from your chosen palette can be used for text and background, creating a cohesive visual.</p>
+                    <p>It's important to ensure good readability with sufficient contrast against the background and other elements.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="toastNotification" class="toast-notification"></div>
+
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Login to Color Away</h3>
+                <button class="modal-close-button">&times;</button>
+            </div>
+            <div class="modal-body login-form">
+                <form id="loginForm">
+                    <label for="username">Username / Email:</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username or email">
+
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password">
+
+                    <button type="submit">Log In</button>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="aboutModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>The Beauty of Colors and the Importance of Color Theory</h3>
+                <button class="modal-close-button">&times;</button>
+            </div>
+            <div class="modal-body about-content">
+                <p>Colors are not merely pigments; they are a profound language, shaping our emotions, influencing our decisions, and defining our perceptions of the world. From the soothing greens of nature to the passionate reds of a sunset, every hue carries a unique vibrational energy and deep-seated cultural significance. Understanding this vibrant spectrum is the first step towards truly artistic expression.</p>
+                <img src="https://placehold.co/600x400/000000/FFFFFF?text=Color+Psychology" alt="Abstract colors representing color psychology">
+                <p>
+                    **Color theory** is the meticulously crafted framework that guides us in harnessing this power. It's the science and art of how colors interact and combine, enabling designers, artists, and creators to evoke specific moods, create harmonious compositions, and establish visual hierarchy. Concepts like complementary, analogous, triadic, and monochromatic schemes aren't just academic terms; they are practical tools that unlock endless possibilities for aesthetic balance and impactful communication. Without a grasp of color theory, designs can feel chaotic or uninspired; with it, they become masterpieces of visual harmony.
+                </p>
+                <p>
+                    This playground is an invitation to explore these theories interactively. Discover how a single base color can unlock a universe of harmonious possibilities, and witness how these palettes can breathe life into everyday UI elements. It's a journey into the heart of visual communication, empowering you to craft compelling narratives and designs that truly resonate. Embrace the spectrum, understand its rules, and then break them creatively!
+                </p>
+                <img src="https://placehold.co/600x400/000000/FFFFFF?text=Design+Harmony" alt="Abstract pattern representing color harmony in design">
+            </div>
+        </div>
+    </div>
+
+    <div id="supportModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Contact Color Away Support</h3>
+                <button class="modal-close-button">&times;</button>
+            </div>
+            <div class="modal-body support-content">
+                <p>We're here to help you on your color journey!</p>
+                <p>For inquiries or assistance, please contact us:</p>
+                <p>Email: <a href="mailto:support.coloraway@gmail.com">support.coloraway@gmail.com</a></p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=mailto:support.coloraway@gmail.com" alt="QR Code for support email" class="qr-code">
+                <p>Address:</p>
+                <p>Color Away Headquarters</p>
+                <p>123 Spectrum Lane, Artville, CA 90210, USA</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const baseColorPicker = document.getElementById('baseColorPicker');
+        const baseColorValueDisplay = document.getElementById('baseColorValue');
+        const complementaryPaletteDiv = document.getElementById('complementaryPalette');
+        const analogousPaletteDiv = document.getElementById('analogousPalette');
+        const triadicPaletteDiv = document.getElementById('triadicPalette');
+        const monochromaticPaletteDiv = document.getElementById('monochromaticPalette');
+        const demoButton = document.getElementById('demoButton');
+        const demoTextBlock = document.getElementById('demoTextBlock');
+        const toastNotification = document.getElementById('toastNotification');
+
+        const colorStripBanner = document.getElementById('colorStripBanner');
+        const baseColorSegment = document.getElementById('baseColorSegment');
+        const complementaryColorSegment = document.getElementById('complementaryColorSegment');
+        const analogousColorSegment = document.getElementById('analogousColorSegment');
+        const monochromaticColorSegment = document.getElementById('monochromaticColorSegment');
+
+        const buttonLabel = document.getElementById('buttonLabel');
+        const textBlockLabel = document.getElementById('textBlockLabel');
+
+        // Modal Elements
+        const loginButton = document.getElementById('loginButton');
+        const aboutButton = document.getElementById('aboutButton');
+        const supportButton = document.getElementById('supportButton'); // New support button
+        const loginModal = document.getElementById('loginModal');
+        const aboutModal = document.getElementById('aboutModal');
+        const supportModal = document.getElementById('supportModal'); // New support modal
+        const loginForm = document.getElementById('loginForm'); // Reference to the login form
+
+        /* --- Color Conversion Helper Functions --- */
+
+        /**
+         * Converts HSL (Hue, Saturation, Lightness) to RGB.
+         * HSL values are in [0, 360) for H, [0, 100] for S and L.
+         * RGB values are in [0, 255].
+         * @param {number} h Hue (0-360)
+         * @param {number} s Saturation (0-100)
+         * @param {number} l Lightness (0-100)
+         * @returns {object} {r, g, b}
+         */
+        function hslToRgb(h, s, l) {
+            s /= 100; // Convert S from [0, 100] to [0, 1]
+            l /= 100; // Convert L from [0, 100] to [0, 1]
+
+            let c = (1 - Math.abs(2 * l - 1)) * s;
+            let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+            let m = l - c / 2;
+            let r = 0, g = 0, b = 0;
+
+            if (0 <= h && h < 60) {
+                r = c; g = x; b = 0;
+            } else if (60 <= h && h < 120) {
+                r = x; g = c; b = 0;
+            } else if (120 <= h && h < 180) {
+                r = 0; g = c; b = x;
+            } else if (180 <= h && h < 240) {
+                r = 0; g = x; b = c;
+            } else if (240 <= h && h < 300) {
+                r = x; g = 0; b = c;
+            } else if (300 <= h && h < 360) {
+                r = c; g = 0; b = x;
+            }
+
+            r = Math.round((r + m) * 255);
+            g = Math.round((g + m) * 255);
+            b = Math.round((b + m) * 255);
+
+            return { r, g, b };
+        }
+
+        /**
+         * Converts RGB (Red, Green, Blue) to HSL.
+         * RGB values are in [0, 255].
+         * HSL values are in [0, 360) for H, [0, 100] for S and L.
+         * @param {number} r Red (0-255)
+         * @param {number} g Green (0-255)
+         * @param {number} b Blue (0-255)
+         * @returns {object} {h, s, l}
+         */
+        function rgbToHsl(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+
+            let max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0; // achromatic
+            } else {
+                let d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+
+            return {
+                h: h * 360,
+                s: s * 100, // Convert S to [0, 100]
+                l: l * 100  // Convert L to [0, 100]
+            };
+        }
+
+        /**
+         * Converts a Hex color string to HSL.
+         * @param {string} hex Hex color string (e.g., "#RRGGBB")
+         * @returns {object} {h, s, l}
+         */
+        function hexToHsl(hex) {
+            let r = parseInt(hex.slice(1, 3), 16);
+            let g = parseInt(hex.slice(3, 5), 16);
+            let b = parseInt(hex.slice(5, 7), 16);
+            return rgbToHsl(r, g, b);
+        }
+
+        /**
+         * Converts HSL values to a Hex color string.
+         * @param {number} h Hue (0-360)
+         * @param {number} s Saturation (0-100)
+         * @param {number} l Lightness (0-100)
+         * @returns {string} Hex color string (e.g., "#RRGGBB")
+         */
+        function hslToHex(h, s, l) {
+            const { r, g, b } = hslToRgb(h, s, l);
+            const toHex = (c) => {
+                const hex = Math.round(c).toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            };
+            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        }
+
+        /**
+         * Converts HSL values to an RGB string (e.g., "rgb(255, 0, 0)").
+         * @param {number} h Hue (0-360)
+         * @param {number} s Saturation (0-100)
+         * @param {number} l Lightness (0-100)
+         * @returns {string} RGB string.
+         */
+        function hslToRgbString(h, s, l) {
+            const { r, g, b } = hslToRgb(h, s, l);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        /**
+         * Converts HSL values to an HSL string (e.g., "hsl(0, 100%, 50%)").
+         * @param {number} h Hue (0-360)
+         * @param {number} s Saturation (0-100)
+         * @param {number} l Lightness (0-100)
+         * @returns {string} HSL string.
+         */
+        function hslToHslString(h, s, l) {
+            return `hsl(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%)`;
+        }
+
+        /**
+         * Clamps a value within a min/max range.
+         * @param {number} value The value to clamp.
+         * @param {number} min The minimum allowed value.
+         * @param {number} max The maximum allowed value.
+         * @returns {number} The clamped value.
+         */
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(value, max));
+        }
+
+        /**
+         * Adjusts hue value to stay within [0, 360).
+         * @param {number} h Hue value.
+         * @returns {number} Adjusted hue value.
+         */
+        function adjustHue(h) {
+            return (h % 360 + 360) % 360;
+        }
+
+        /**
+         * Determines if a color is light enough for dark text or dark enough for light text.
+         * @param {number} r Red component (0-255)
+         * @param {number} g Green component (0-255)
+         * @param {number} b Blue component (0-255)
+         * @returns {boolean} True if the color is light, false if dark.
+         */
+        function isLightColor(r, g, b) {
+            // Calculate luminance using the WCAG formula
+            const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+            return luminance > 0.5; // Threshold for determining "lightness"
+        }
+
+        /* --- Palette Generation Logic --- */
+
+        /**
+         * Generates a complementary color palette.
+         * @param {object} hslBase {h, s, l} of the base color.
+         * @returns {Array<object>} Array of {hex, rgb, hsl} color objects.
+         */
+        function generateComplementary(hslBase) {
+            const hComp = adjustHue(hslBase.h + 180);
+            return [
+                { hex: hslToHex(hslBase.h, hslBase.s, hslBase.l), rgb: hslToRgbString(hslBase.h, hslBase.s, hslBase.l), hsl: hslToHslString(hslBase.h, hslBase.s, hslBase.l) },
+                { hex: hslToHex(hComp, hslBase.s, hslBase.l), rgb: hslToRgbString(hComp, hslBase.s, hslBase.l), hsl: hslToHslString(hComp, hslBase.s, hslBase.l) }
+            ];
+        }
+
+        /**
+         * Generates an analogous color palette.
+         * @param {object} hslBase {h, s, l} of the base color.
+         * @returns {Array<object>} Array of {hex, rgb, hsl} color objects.
+         */
+        function generateAnalogous(hslBase) {
+            const h1 = adjustHue(hslBase.h - 30); // -30 degrees hue shift
+            const h2 = adjustHue(hslBase.h + 30); // +30 degrees hue shift
+            return [
+                { hex: hslToHex(h1, hslBase.s, hslBase.l), rgb: hslToRgbString(h1, hslBase.s, hslBase.l), hsl: hslToHslString(h1, hslBase.s, hslBase.l) },
+                { hex: hslToHex(hslBase.h, hslBase.s, hslBase.l), rgb: hslToRgbString(hslBase.h, hslBase.s, hslBase.l), hsl: hslToHslString(hslBase.h, hslBase.s, hslBase.l) },
+                { hex: hslToHex(h2, hslBase.s, hslBase.l), rgb: hslToRgbString(h2, hslBase.s, hslBase.l), hsl: hslToHslString(h2, hslBase.s, hslBase.l) }
+            ];
+        }
+
+        /**
+         * Generates a triadic color palette.
+         * @param {object} hslBase {h, s, l} of the base color.
+         * @returns {Array<object>} Array of {hex, rgb, hsl} color objects.
+         */
+        function generateTriadic(hslBase) {
+            const h1 = adjustHue(hslBase.h);
+            const h2 = adjustHue(hslBase.h + 120);
+            const h3 = adjustHue(hslBase.h + 240);
+            return [
+                { hex: hslToHex(h1, hslBase.s, hslBase.l), rgb: hslToRgbString(h1, hslBase.s, hslBase.l), hsl: hslToHslString(h1, hslBase.s, hslBase.l) },
+                { hex: hslToHex(h2, hslBase.s, hslBase.l), rgb: hslToRgbString(h2, hslBase.s, hslBase.l), hsl: hslToHslString(h2, hslBase.s, hslBase.l) },
+                { hex: hslToHex(h3, hslBase.s, hslBase.l), rgb: hslToRgbString(h3, hslBase.s, hslBase.l), hsl: hslToHslString(h3, hslBase.s, hslBase.l) }
+            ];
+        }
+
+        /**
+         * Generates a monochromatic color palette.
+         * @param {object} hslBase {h, s, l} of the base color.
+         * @returns {Array<object>} Array of {hex, rgb, hsl} color objects.
+         */
+        function generateMonochromatic(hslBase) {
+            const palette = [];
+            // Generate darker shades
+            for (let i = 2; i >= 1; i--) {
+                const l = clamp(hslBase.l - i * 15, 5, 95); // Shift lightness by 15%
+                palette.push({ hex: hslToHex(hslBase.h, hslBase.s, l), rgb: hslToRgbString(hslBase.h, hslBase.s, l), hsl: hslToHslString(hslBase.h, hslBase.s, l) });
+            }
+            // Add the base color
+            palette.push({ hex: hslToHex(hslBase.h, hslBase.s, hslBase.l), rgb: hslToRgbString(hslBase.h, hslBase.s, hslBase.l), hsl: hslToHslString(hslBase.h, hslBase.s, hslBase.l) });
+            // Generate lighter shades
+            for (let i = 1; i <= 2; i++) {
+                const l = clamp(hslBase.l + i * 15, 5, 95);
+                palette.push({ hex: hslToHex(hslBase.h, hslBase.s, l), rgb: hslToRgbString(hslBase.h, hslBase.s, l), hsl: hslToHslString(hslBase.h, hslBase.s, l) });
+            }
+            return palette;
+        }
+
+        /* --- UI Update Functions --- */
+
+        /**
+         * Renders color swatches for a given palette into a target div.
+         * Attaches event listeners for click (copy) and hover (tooltip).
+         * @param {HTMLElement} targetDiv The div to append swatches to.
+         * @param {Array<object>} colors Array of {hex, rgb, hsl} color objects.
+         */
+        function renderSwatches(targetDiv, colors) {
+            targetDiv.innerHTML = ''; // Clear previous swatches
+            colors.forEach(colorObj => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = colorObj.hex;
+                
+                // Create tooltip element
+                const tooltip = document.createElement('div');
+                tooltip.className = 'swatch-tooltip';
+                tooltip.innerHTML = `<strong>HEX:</strong> ${colorObj.hex.toUpperCase()}<br>` +
+                                    `<strong>RGB:</strong> ${colorObj.rgb}<br>` +
+                                    `<strong>HSL:</strong> ${colorObj.hsl}`;
+                swatch.appendChild(tooltip);
+
+                // Add click event listener to copy color to clipboard
+                swatch.addEventListener('click', () => {
+                    navigator.clipboard.writeText(colorObj.hex.toUpperCase()).then(() => {
+                        showToast(`Copied ${colorObj.hex.toUpperCase()} to clipboard!`);
+                    }).catch(err => {
+                        console.error('Failed to copy text: ', err);
+                        showToast('Failed to copy color.', true); // Show error toast
+                    });
+                });
+
+                targetDiv.appendChild(swatch);
+            });
+        }
+
+        /**
+         * Shows a temporary toast notification.
+         * @param {string} message The message to display.
+         * @param {boolean} isError If true, styles as an error toast.
+         */
+        let toastTimeout;
+        function showToast(message, isError = false) {
+            clearTimeout(toastTimeout); // Clear any existing timeout
+
+            toastNotification.textContent = message;
+            toastNotification.classList.remove('show'); // Ensure reset for re-showing
+            toastNotification.style.backgroundColor = isError ? 'rgba(200, 50, 50, 0.9)' : 'rgba(50, 200, 100, 0.9)';
+            
+            // Force reflow to restart CSS animation if already visible
+            void toastNotification.offsetWidth; 
+            toastNotification.classList.add('show');
+            
+            // Hide after 3 seconds
+            toastTimeout = setTimeout(() => {
+                toastNotification.classList.remove('show');
+            }, 3000);
+        }
+
+        /**
+         * Updates the dynamic color strip banner at the top.
+         * @param {string} baseHex Base color in hex.
+         * @param {Array<object>} complementaryPalette
+         * @param {Array<object>} analogousPalette
+         * @param {Array<object>} monochromaticPalette
+         */
+        function updateColorStripBanner(baseHex, complementaryPalette, analogousPalette, monochromaticPalette) {
+            baseColorSegment.style.backgroundColor = baseHex;
+            complementaryColorSegment.style.backgroundColor = complementaryPalette[1].hex;
+            // Pick a prominent analogous color (e.g., the first one generated)
+            analogousColorSegment.style.backgroundColor = analogousPalette[0].hex; 
+            // Pick a prominent monochromatic color (e.g., a contrasting shade, e.g., the darkest)
+            monochromaticColorSegment.style.backgroundColor = monochromaticPalette[0].hex; 
+        }
+
+        /**
+         * Updates the UI elements (button, text block) with colors from generated palettes.
+         * Also updates the dynamic aura effect on the container.
+         * @param {string} baseHex The base color in hex format.
+         * @param {object} hslBase {h, s, l} of the base color.
+         * @param {Array<object>} complementaryPalette The generated complementary palette.
+         * @param {Array<object>} monochromaticPalette The generated monochromatic palette.
+         */
+        function updateUIElements(baseHex, hslBase, complementaryPalette, monochromaticPalette) {
+            const baseRgb = hslToRgb(hslBase.h, hslBase.s, hslBase.l);
+
+            // Demo Button
+            demoButton.style.backgroundColor = baseHex;
+            // Determine text color based on complementary color lightness for contrast with base
+            const buttonTextColor = complementaryPalette[1] ? complementaryPalette[1].hex : '#FFF';
+            demoButton.style.color = buttonTextColor;
+            
+            // Add hover effects for button
+            demoButton.onmouseover = () => {
+                const hoverBaseRgb = hslToRgb(hslBase.h, hslBase.s, hslBase.l);
+                const hoverTextColor = isLightColor(hoverBaseRgb.r, hoverBaseRgb.g, hoverBaseRgb.b) ? '#333' : '#FFF';
+                demoButton.style.textShadow = `0 0 15px ${hoverTextColor}`; // subtle glow
+                demoButton.style.boxShadow = `0 8px 20px rgba(0, 0, 0, 0.6), 0 0 25px ${baseHex}`; // Enhanced glow on hover
+            };
+            demoButton.onmouseout = () => {
+                demoButton.style.textShadow = '';
+                demoButton.style.boxShadow = `0 4px 18px rgba(0, 0, 0, 0.5)`; // Reset to initial shadow
+            };
+
+            // Demo Text Block
+            // Use a darker monochromatic shade for background, lighter for text, and a mid-tone for border
+            const textBlockBgColor = monochromaticPalette[0] ? monochromaticPalette[0].hex : 'rgba(255, 255, 255, 0.08)'; // The darkest mono shade
+            const textBlockTextColor = monochromaticPalette[monochromaticPalette.length - 1] ? monochromaticPalette[monochromaticPalette.length - 1].hex : 'var(--text-light)'; // The lightest mono shade for text
+            const textBlockBorderColor = monochromaticPalette[1] ? monochromaticPalette[1].hex : 'rgba(255, 255, 255, 0.15)'; // A mid-dark mono shade for border
+
+            demoTextBlock.style.backgroundColor = textBlockBgColor;
+            demoTextBlock.style.color = textBlockTextColor;
+            demoTextBlock.style.borderColor = textBlockBorderColor;
+
+            // Add hover effects for text block
+            demoTextBlock.onmouseover = () => {
+                demoTextBlock.style.boxShadow = `0 6px 20px rgba(0, 0, 0, 0.5), 0 0 30px ${baseHex}`; // Glow based on base color
+                demoTextBlock.style.borderColor = baseHex;
+            };
+            demoTextBlock.onmouseout = () => {
+                demoTextBlock.style.boxShadow = `0 4px 18px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(255, 255, 255, 0.03)`; // Reset to initial shadow
+                demoTextBlock.style.borderColor = textBlockBorderColor;
+            };
+
+            // Dynamic Aura on Container
+            const container = document.querySelector('.container');
+            const auraColor = `rgba(${baseRgb.r}, ${baseRgb.g}, ${baseRgb.b}, 0.2)`; // Subtle transparent base color
+            container.style.boxShadow = `
+                0 15px 60px var(--shadow-heavy),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                0 0 40px ${auraColor} /* Dynamic glow based on base color */
+            `;
+        }
+
+        /**
+         * Main function to update all palette displays and UI elements.
+         * @param {string} hexColor The selected base color in hex format.
+         */
+        function updatePlayground(hexColor) {
+            // Update base color display
+            baseColorValueDisplay.textContent = `Hex: ${hexColor.toUpperCase()}`;
+
+            const hslBase = hexToHsl(hexColor);
+
+            // Generate palettes
+            const complementaryColors = generateComplementary(hslBase);
+            const analogousColors = generateAnalogous(hslBase);
+            const triadicColors = generateTriadic(hslBase);
+            const monochromaticColors = generateMonochromatic(hslBase);
+
+            // Render swatches for each palette
+            renderSwatches(complementaryPaletteDiv, complementaryColors);
+            renderSwatches(analogousPaletteDiv, analogousColors);
+            renderSwatches(triadicPaletteDiv, triadicColors);
+            renderSwatches(monochromaticPaletteDiv, monochromaticColors);
+
+            // Update UI elements based on the generated palettes
+            updateUIElements(hexColor, hslBase, complementaryColors, monochromaticColors);
+
+            // Update the dynamic color strip banner
+            updateColorStripBanner(hexColor, complementaryColors, analogousColors, monochromaticColors);
+        }
+
+        /* --- Modal Functions --- */
+
+        /**
+         * Shows a specific modal.
+         * @param {HTMLElement} modalElement The modal overlay element to show.
+         */
+        function showModal(modalElement) {
+            modalElement.classList.add('show');
+        }
+
+        /**
+         * Hides a specific modal.
+         * @param {HTMLElement} modalElement The modal overlay element to hide.
+         */
+        function hideModal(modalElement) {
+            modalElement.classList.remove('show');
+        }
+
+        /* --- Event Listeners & Initial Load --- */
+
+        // Event listener for color picker changes
+        baseColorPicker.addEventListener('input', (event) => {
+            updatePlayground(event.target.value);
+        });
+
+        // Add event listeners for modal buttons
+        loginButton.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default anchor link behavior
+            showModal(loginModal);
+        });
+
+        aboutButton.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default anchor link behavior
+            showModal(aboutModal);
+        });
+
+        supportButton.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default anchor link behavior
+            showModal(supportModal);
+        });
+
+        // Close modal when clicking on the close button or overlay
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                // If click is directly on the overlay or on a close button within it
+                if (e.target === overlay || e.target.classList.contains('modal-close-button')) {
+                    hideModal(overlay);
+                }
+            });
+        });
+
+        // Frontend login form functionality
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevent actual form submission
+
+            const usernameInput = loginForm.querySelector('#username');
+            const passwordInput = loginForm.querySelector('#password');
+
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!username || !password) {
+                showToast("Please enter both username/email and password.", true); // Error toast
+            } else {
+                showToast(`Login attempted for "${username}". (This is a demo, no actual login occurs.)`); // Success toast
+                console.log(`Demo Login Attempt: Username/Email - "${username}", Password - "${password}"`);
+                // Clear fields after successful demo attempt
+                usernameInput.value = '';
+                passwordInput.value = '';
+                hideModal(loginModal); // Optionally hide modal on successful demo login
+            }
+        });
+
+        // Initial load: Set up the playground with the default color
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePlayground(baseColorPicker.value);
+        });
+    </script>
+</body>
+</html>
